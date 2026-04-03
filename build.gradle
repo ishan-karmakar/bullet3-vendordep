@@ -1,0 +1,43 @@
+import edu.wpi.first.toolchain.*
+
+plugins {
+  id 'cpp'
+}
+
+// Apply C++ configuration
+apply from: 'config.gradle'
+
+task buildBulletDebug {
+  doLast {
+    exec {
+      commandLine "cmake", "-B", "debug", "-DCMAKE_BUILD_TYPE=Debug"
+    }
+  }
+  doLast {
+    exec {
+      commandLine "cmake", "--build", "debug", "--config", "Debug", "--parallel", "${Runtime.runtime.availableProcessors()}"
+    }
+  }
+}
+
+task buildBulletRelease {
+  doLast {
+    exec {
+      commandLine "cmake", "-B", "release", "-DCMAKE_BUILD_TYPE=Release"
+    }
+  }
+  doLast {
+    exec {
+      commandLine "cmake", "--build", "release", "--config", "Release", "--parallel", "${Runtime.runtime.availableProcessors()}"
+    }
+  }
+}
+
+build.dependsOn buildBulletRelease
+build.dependsOn buildBulletDebug
+
+apply from: 'publish.gradle'
+
+wrapper {
+  gradleVersion = '8.14.3'
+}

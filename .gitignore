@@ -2,6 +2,9 @@
 /build3/gmake
 /build3/vs2010
 /build_cmake/
+/release
+/debug
+/.gradle
 
 *.pyc
 
