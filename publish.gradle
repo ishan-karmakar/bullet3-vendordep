@@ -5,7 +5,7 @@ apply plugin: 'maven-publish'
 
 ext.licenseFile = files("$rootDir/LICENSE.txt")
 
-def templateVendorFile = "Bullet3.json"
+def templateVendorFile = "Bullet.json"
 
 def pubVersion = '0.0.1'
 
@@ -48,7 +48,7 @@ ext.addTaskToCopyAllOutputs = { task ->
 }
 
 def artifactGroupId = 'org.valor6800'
-def baseArtifactId = 'Bullet3'
+def baseArtifactId = 'Bullet'
 def zipBaseName = "_GROUP_org_valor6800_ID_${baseArtifactId}-cpp_CLS"
 
 task cppHeadersZip(type: Zip) {
@@ -81,10 +81,34 @@ task cppSourceZip(type: Zip) {
     }
 }
 
+task cppReleaseZip(type: Zip) {
+    destinationDirectory = outputsFolder
+    archiveBaseName = '_M_' + zipBaseName
+    archiveClassifier = 'windowsx86-64static'
+
+    from('release/lib/Release') {
+        into 'windows/x86-64/static'
+    }
+}
+
+task cppDebugZip(type: Zip) {
+    destinationDirectory = outputsFolder
+    archiveBaseName = '_M_' + zipBaseName
+    archiveClassifier = 'windowsx86-64staticdebug'
+
+    from ('debug/lib/Debug') {
+        into 'windows/x86-64/static'
+    }
+}
+
 build.dependsOn cppHeadersZip
 addTaskToCopyAllOutputs(cppHeadersZip)
 build.dependsOn cppSourceZip
 addTaskToCopyAllOutputs(cppSourceZip)
+build.dependsOn cppReleaseZip
+addTaskToCopyAllOutputs(cppReleaseZip)
+build.dependsOn cppDebugZip
+addTaskToCopyAllOutputs(cppDebugZip)
 
 // Apply template variables from the vendordep file.
 // Replaces ${VARIABLE} with VARIABLE: value in expand()
@@ -136,15 +160,12 @@ tasks.matching {it != cleanReleaseRepo}.all {it.dependsOn cleanReleaseRepo}
 
 model {
     publishing {
-        def taskList = createComponentZipTasks($.components, ['Vendor'], zipBaseName, Zip, project, includeStandardZipFormat)
-
         publications {
             cpp(MavenPublication) {
-                taskList.each {
-                    artifact it
-                }
                 artifact cppHeadersZip
                 artifact cppSourceZip
+                artifact cppReleaseZip
+                artifact cppDebugZip
 
                 artifactId = "${baseArtifactId}-cpp"
                 groupId = artifactGroupId

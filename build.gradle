@@ -7,15 +7,18 @@ plugins {
 // Apply C++ configuration
 apply from: 'config.gradle'
 
+def CMAKE_CONFIGURE_FLAGS = ["-DBUILD_UNIT_TESTS=OFF", "-DBUILD_CPU_DEMOS=OFF", "-DBUILD_OPENGL3_DEMOS=OFF", "-DBUILD_BULLET2_DEMOS=OFF", "-DBUILD_EXTRAS=OFF"]
+def CMAKE_BUILD_FLAGS = ["-j", Runtime.runtime.availableProcessors()]
+
 task buildBulletDebug {
   doLast {
     exec {
-      commandLine "cmake", "-B", "debug", "-DCMAKE_BUILD_TYPE=Debug"
+      commandLine "cmake", "-B", "debug", "-DCMAKE_BUILD_TYPE=Debug", *CMAKE_CONFIGURE_FLAGS
     }
   }
   doLast {
     exec {
-      commandLine "cmake", "--build", "debug", "--config", "Debug", "--parallel", "${Runtime.runtime.availableProcessors()}"
+      commandLine "cmake", "--build", "debug", "--config", "Debug", *CMAKE_BUILD_FLAGS
     }
   }
 }
@@ -23,12 +26,12 @@ task buildBulletDebug {
 task buildBulletRelease {
   doLast {
     exec {
-      commandLine "cmake", "-B", "release", "-DCMAKE_BUILD_TYPE=Release"
+      commandLine "cmake", "-B", "release", "-DCMAKE_BUILD_TYPE=Release", *CMAKE_CONFIGURE_FLAGS
     }
   }
   doLast {
     exec {
-      commandLine "cmake", "--build", "release", "--config", "Release", "--parallel", "${Runtime.runtime.availableProcessors()}"
+      commandLine "cmake", "--build", "release", "--config", "Release", *CMAKE_BUILD_FLAGS
     }
   }
 }
